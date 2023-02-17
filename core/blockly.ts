@@ -163,7 +163,7 @@ import {WorkspaceCommentSvg} from './workspace_comment_svg.js';
 import {WorkspaceDragger} from './workspace_dragger.js';
 import {resizeSvgContents as realResizeSvgContents, WorkspaceSvg} from './workspace_svg.js';
 import * as Xml from './xml.js';
-import {ZoomControls} from './zoom_controls.js';
+import {ZoomControls} from './Zoom Controls.js';
 
 
 /**
