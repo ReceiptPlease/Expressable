@@ -36,6 +36,23 @@ export type Names =
     Enum<typeof Names>
 
 
+
+interface KeyProps {
+    modifiers : Array<KeyCodes> | null
+    base : KeyCodes
+}
+
+const Key = ( props : KeyProps ) =>
+    ShortcutRegistry.registry
+        .createSerializedKey(props.base,props.modifiers);
+
+const Variants = ( base : KeyCodes , modifiers : Array<KeyCodes> = [] ) => [
+    Key({ base , modifiers : [ ... modifiers , KeyCodes.CTRL ] }) ,
+    Key({ base , modifiers : [ ... modifiers , KeyCodes.ALT ] }) ,
+    Key({ base , modifiers : [ ... modifiers , KeyCodes.META ] }) ,
+]
+
+
 /**
  *  Keyboard shortcut to hide chaff on escape.
  */
@@ -44,8 +61,8 @@ export function registerEscape (){
 
     const shortcut = <KeyboardShortcut> {
 
-        keyCodes: [KeyCodes.ESC],
-        name: Names.Escape,
+        keyCodes : [ KeyCodes.ESC ] ,
+        name : Names.Escape ,
 
         preconditionFn : ( workspace ) =>
             ! workspace.options.readOnly ,
@@ -72,9 +89,12 @@ export function registerDelete (){
 
         preconditionFn ( workspace ){
 
-            const selected = common.getSelected();
-            return !workspace.options.readOnly && selected != null &&
-            selected.isDeletable();
+            const selected = common
+                .getSelected();
+
+            return ! workspace.options.readOnly
+                && selected != null
+                && selected.isDeletable()
         },
 
         callback ( _ , event ){
@@ -91,7 +111,7 @@ export function registerDelete (){
             if( Gesture.inProgress() )
                 return false;
 
-            (common.getSelected() as BlockSvg)
+            ( common.getSelected() as BlockSvg )
                 .checkAndDelete();
 
             return true;
@@ -109,18 +129,9 @@ export function registerDelete (){
 
 export function registerCopy (){
 
-    const ctrlC = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.C,[ KeyCodes.CTRL ]);
+    const shortcut = <KeyboardShortcut> {
 
-    const altC = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.C,[ KeyCodes.ALT ]);
-
-    const metaC = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.C,[ KeyCodes.META ]);
-
-    const copyShortcut: KeyboardShortcut = {
-
-        keyCodes : [ ctrlC , altC , metaC ] ,
+        keyCodes : Variants(KeyCodes.C) ,
         name : Names.Copy ,
 
         preconditionFn ( workspace ){
@@ -154,7 +165,7 @@ export function registerCopy (){
     }
 
     ShortcutRegistry.registry
-        .register(copyShortcut);
+        .register(shortcut);
 }
 
 
@@ -164,18 +175,9 @@ export function registerCopy (){
 
 export function registerCut (){
 
-    const ctrlX = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.X,[ KeyCodes.CTRL ]);
+    const shortcut = <KeyboardShortcut> {
 
-    const altX = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.X,[ KeyCodes.ALT ]);
-
-    const metaX = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.X,[ KeyCodes.META ]);
-
-    const cutShortcut = <KeyboardShortcut> {
-
-        keyCodes : [ ctrlX , altX , metaX ] ,
+        keyCodes : Variants(KeyCodes.X) ,
         name : Names.Cut ,
 
         preconditionFn ( workspace ){
@@ -213,7 +215,7 @@ export function registerCut (){
     }
 
     ShortcutRegistry.registry
-        .register(cutShortcut);
+        .register(shortcut);
 }
 
 
@@ -223,18 +225,9 @@ export function registerCut (){
 
 export function registerPaste (){
 
-    const ctrlV = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.V,[ KeyCodes.CTRL ]);
+    const shortcut = <KeyboardShortcut> {
 
-    const altV = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.V,[ KeyCodes.ALT ]);
-
-    const metaV = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.V,[ KeyCodes.META ]);
-
-    const pasteShortcut = <KeyboardShortcut> {
-
-        keyCodes : [ ctrlV , altV , metaV ] ,
+        keyCodes : Variants(KeyCodes.V) ,
         name : Names.Paste ,
 
         preconditionFn : ( workspace ) =>
@@ -246,7 +239,7 @@ export function registerPaste (){
     }
 
     ShortcutRegistry.registry
-        .register(pasteShortcut);
+        .register(shortcut);
 }
 
 
@@ -256,18 +249,9 @@ export function registerPaste (){
 
 export function registerUndo (){
 
-    const ctrlZ = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.Z,[ KeyCodes.CTRL ]);
+    const shortcut = <KeyboardShortcut> {
 
-    const altZ = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.Z,[ KeyCodes.ALT ]);
-
-    const metaZ = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.Z,[ KeyCodes.META ]);
-
-    const undoShortcut = <KeyboardShortcut> {
-
-        keyCodes : [ ctrlZ , altZ , metaZ ] ,
+        keyCodes : Variants(KeyCodes.Z) ,
         name : Names.Undo ,
 
         preconditionFn : ( workspace ) =>
@@ -284,7 +268,7 @@ export function registerUndo (){
     }
 
     ShortcutRegistry.registry
-        .register(undoShortcut);
+        .register(shortcut);
 }
 
 
@@ -294,24 +278,20 @@ export function registerUndo (){
 
 export function registerRedo (){
 
-    const ctrlShiftZ = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.Z,[ KeyCodes.SHIFT , KeyCodes.CTRL ]);
-
-    const altShiftZ = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.Z,[ KeyCodes.SHIFT , KeyCodes.ALT ]);
-
-    const metaShiftZ = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.Z,[ KeyCodes.SHIFT , KeyCodes.META ]);
+    const [ ctrl , alt , meta ] =
+        Variants(KeyCodes.Z,[ KeyCodes.SHIFT ]);
 
     // Ctrl-y is redo in Windows.  Command-y is never valid on Macs.
 
-    const ctrlY = ShortcutRegistry.registry
-        .createSerializedKey(KeyCodes.Y,[ KeyCodes.CTRL ]);
+    const ctrlY = Key({
+        modifiers : [ KeyCodes.CTRL ] ,
+        base : KeyCodes.Y
+    });
 
 
-    const redoShortcut = <KeyboardShortcut> {
+    const shortcut = <KeyboardShortcut> {
 
-        keyCodes : [ ctrlShiftZ , altShiftZ , metaShiftZ , ctrlY ] ,
+        keyCodes : [ ctrl , alt , meta , ctrlY ] ,
         name : Names.Redo ,
 
         preconditionFn : ( workspace ) =>
@@ -329,7 +309,7 @@ export function registerRedo (){
     }
 
     ShortcutRegistry.registry
-        .register(redoShortcut);
+        .register(shortcut);
 }
 
 
